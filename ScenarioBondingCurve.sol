@@ -24,7 +24,7 @@ contract ScenarioBondingCurve {
     public {
         beneficiary = 0x225991BbF363a9ffE3aD0ebb9d6cFe7e79Cdb3FF;
         exponent = 2;
-        coefficient = 1;
+        coefficient = 1000000000;
         reserveRatio = 800000000000;
         currentSupply = 1;
     }
@@ -72,7 +72,7 @@ contract ScenarioBondingCurve {
     function integral(uint256 limitA, uint256 limitB, uint256 multiplier)
     internal returns (uint256) {
         uint256 raiseExp = exponent + 1;
-        uint256 _coefficient = coefficient.mul(multiplier);
+        uint256 _coefficient = coefficient.mul(multiplier).div(precision);
         if (multiplier != 1) {
             _coefficient = _coefficient.div(precision);
         }
