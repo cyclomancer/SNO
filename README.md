@@ -1,3 +1,3 @@
-# SNO
-Funding climate change research and adaptation with Impact Bonding Curves
+# SNODEX
+Driving engagement and funding of climate change research with Scenario Bonding Curves
 
