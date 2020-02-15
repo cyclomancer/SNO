@@ -5,14 +5,14 @@ import "./SafeMath.sol";
 contract ScenarioBondingCurve {
     using SafeMath for uint256;
 
-    address public beneficiary;
+    address payable public beneficiary;
     uint256 public currentSupply;
     uint256 public totalContributed;
     mapping (address => uint256) public ledger;
     mapping (address => uint256) public contributions;
 
     uint8 public exponent;
-    uint8 public coefficient;
+    uint256 public coefficient;
     uint256 public reserveRatio;
 
     uint256 private constant precision = 1000000000000;
