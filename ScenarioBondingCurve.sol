@@ -75,12 +75,13 @@ contract ScenarioBondingCurve is DSMath {
     uint public totalContributed;
     mapping (address => uint) public ledger;
     mapping (address => uint) public contributions;
+    mapping (address => uint) public asks;
 
     uint public exponent;
     uint public coefficient;
     uint public reserveRatio;
     
-    uint public precision = 1000000000000000000;
+    uint public constant precision = 1000000000000000000;
 
     string internal constant INSUFFICIENT_ETH = 'Insufficient Ether';
     string internal constant INSUFFICIENT_TOKENS = 'Request exceeds token balance';
@@ -135,6 +136,23 @@ contract ScenarioBondingCurve is DSMath {
         contributions[sender] = add(contributions[sender], amount);
         totalContributed = add(totalContributed, amount);
     }
+    
+    function setBuyPrice(uint amount)
+    public {
+        uint price = calcMintPrice(amount);
+        asks[msg.sender] = price;
+    }
+    
+    function getPrice()
+    public view returns (uint) {
+        return asks[msg.sender];
+    }
+    
+    function setSellPrice(uint amount)
+    public {
+        uint price = calcBurnReward(amount);
+        asks[msg.sender] = price;
+    }
 
     function integrate(uint limitA, uint limitB, uint multiplier)
     internal returns (uint) {
@@ -146,12 +164,16 @@ contract ScenarioBondingCurve is DSMath {
     }
     
     function calcMintPrice(uint amount)
-    public returns (uint) {
-        return integrate(currentSupply, add(currentSupply, amount), precision);
+    internal returns (uint) {
+        uint newSupply = add(currentSupply, amount);
+        uint result = integrate(currentSupply, newSupply, precision);
+        return result;
     }
 
     function calcBurnReward(uint amount)
-    public returns (uint) {
-        return integrate(sub(currentSupply, amount), currentSupply, reserveRatio);
+    internal returns (uint) {
+        uint newSupply = sub(currentSupply, amount);
+        uint result = integrate(newSupply, currentSupply, precision);
+        return result;
     }
 }
