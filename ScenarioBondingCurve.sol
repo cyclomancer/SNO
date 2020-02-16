@@ -90,7 +90,7 @@ contract ScenarioBondingCurve is DSMath {
     public {
         beneficiary = 0x4aB6A3307AEfcC05b9de8Dbf3B0a6DEcEBa320E6;
         exponent = 2;
-        coefficient = 10000000000000;
+        coefficient = 1000000000000000;
         reserveRatio = wdiv(4, 5);
         currentSupply = 1;
     }
