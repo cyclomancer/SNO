@@ -90,7 +90,7 @@ contract ScenarioBondingCurve is DSMath {
     public {
         beneficiary = 0x4aB6A3307AEfcC05b9de8Dbf3B0a6DEcEBa320E6;
         exponent = 2;
-        coefficient = 1000000000000000;
+        coefficient = 10000000000;
         reserveRatio = wdiv(4, 5);
         currentSupply = 1;
     }
@@ -146,12 +146,12 @@ contract ScenarioBondingCurve is DSMath {
     }
     
     function calcMintPrice(uint amount)
-    internal returns (uint) {
+    public returns (uint) {
         return integrate(currentSupply, add(currentSupply, amount), precision);
     }
 
     function calcBurnReward(uint amount)
-    internal returns (uint) {
+    public returns (uint) {
         return integrate(sub(currentSupply, amount), currentSupply, reserveRatio);
     }
 }
