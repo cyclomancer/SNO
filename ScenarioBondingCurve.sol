@@ -173,7 +173,7 @@ contract ScenarioBondingCurve is DSMath {
     function calcBurnReward(uint amount)
     internal returns (uint) {
         uint newSupply = sub(currentSupply, amount);
-        uint result = integrate(newSupply, currentSupply, precision);
+        uint result = integrate(newSupply, currentSupply, reserveRatio);
         return result;
     }
 }
