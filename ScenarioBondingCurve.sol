@@ -93,7 +93,7 @@ contract ScenarioBondingCurve is DSMath {
         exponent = 2;
         coefficient = 10000000000;
         reserveRatio = wdiv(4, 5);
-        currentSupply = 1;
+        currentSupply = 0;
     }
     
     function buy(uint amount)
@@ -167,6 +167,7 @@ contract ScenarioBondingCurve is DSMath {
     internal returns (uint) {
         uint newSupply = add(currentSupply, amount);
         uint result = integrate(currentSupply, newSupply, precision);
+        result = result < coefficient ? coefficient : result;
         return result;
     }
 
