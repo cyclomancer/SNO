@@ -1,10 +1,12 @@
 # SNO
-Funding and raising informed engagement with climate change research using Scenario Bonding Curves
+*Funding and raising informed engagement with climate change research using Scenario Bonding Curves.*
 
 **Release Note**
+
 The most recent contract code is found in the `updates` branch, while latest to be integrated with the client is under `master`.
 
 **Overview**
+
 One promising use case of the augmented bonding curve (ABC) model is gamifying contribution to public goods by rewarding speculative participation that commits funds to a capital pool for public investment. Simultaneously, in cases where ABC funding targets knowledge production and data providers, the potential exists to extend the model by involving the knowledge domain or information output of the beneficiaries in the market dynamics (eg. price function, token functionality) of curve contracts.
 
 GloPact and its demo project SNO aim to combine these exciting implications for bonding curve design in the context of climate crisis, and other global problematics that suffer from poor incentive alignment and inadequate information availability. We propose a construction called Scenario Bonding Curves (SBCs):
