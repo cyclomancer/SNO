@@ -40,21 +40,6 @@ contract DSMath {
         z = add(mul(x, RAY), y / 2) / y;
     }
 
-    // This famous algorithm is called "exponentiation by squaring"
-    // and calculates x^n with x as fixed-point and n as regular unsigned.
-    //
-    // It's O(log n), instead of O(n) for naive repeated multiplication.
-    //
-    // These facts are why it works:
-    //
-    //  If n is even, then x^n = (x^2)^(n/2).
-    //  If n is odd,  then x^n = x * x^(n-1),
-    //   and applying the equation for even x gives
-    //    x^n = x * (x^2)^((n-1) / 2).
-    //
-    //  Also, EVM division is flooring and
-    //    floor[(n-1) / 2] = floor[n / 2].
-    //
     function rpow(uint x, uint n) internal pure returns (uint z) {
         z = n % 2 != 0 ? x : RAY;
 
@@ -75,13 +60,13 @@ contract ScenarioBondingCurve is DSMath {
     uint public totalContributed;
     mapping (address => uint) public ledger;
     mapping (address => uint) public contributions;
-    mapping (address => uint) public asks;
 
     uint public exponent;
     uint public coefficient;
+    // uint public base;
     uint public reserveRatio;
     
-    uint public constant precision = 1000000000000000000;
+    uint internal constant precision = 1000000000000000000;
 
     string internal constant INSUFFICIENT_ETH = 'Insufficient Ether';
     string internal constant INSUFFICIENT_TOKENS = 'Request exceeds token balance';
@@ -91,10 +76,16 @@ contract ScenarioBondingCurve is DSMath {
     public {
         beneficiary = 0x4aB6A3307AEfcC05b9de8Dbf3B0a6DEcEBa320E6;
         exponent = 2;
+        // base = 2;
         coefficient = 10000000000;
         reserveRatio = wdiv(4, 5);
         currentSupply = 0;
     }
+
+    event CalcPrice(address indexed caller, uint amount, uint price);
+    event Buy(address indexed buyer, uint amount, uint value, uint refund);
+    event Sell(address indexed seller, uint amount, uint value);
+    event Lovequit(address indexed seller, uint amount, uint value);
     
     function buy(uint amount)
     external payable {
@@ -109,6 +100,7 @@ contract ScenarioBondingCurve is DSMath {
         ledger[msg.sender] = add(ledger[msg.sender], amount);
         currentSupply = add(currentSupply, amount);
         contribute(contributionValue, msg.sender);
+        emit Buy(msg.sender, amount, sub(msg.value, refund), refund);
     }
 
     function sell(uint amount)
@@ -118,6 +110,7 @@ contract ScenarioBondingCurve is DSMath {
         msg.sender.transfer(exitValue);
         ledger[msg.sender] = sub(ledger[msg.sender], amount);
         currentSupply = sub(currentSupply, amount);
+        emit Sell(msg.sender, amount, exitValue);
     }
 
     function lovequit()
@@ -128,6 +121,7 @@ contract ScenarioBondingCurve is DSMath {
         currentSupply = sub(currentSupply, holdings);
         contribute(exitValue, msg.sender);
         ledger[msg.sender] = 0;
+        emit Lovequit(msg.sender, holdings, exitValue);
     }
     
     function contribute(uint amount, address sender)
@@ -137,21 +131,17 @@ contract ScenarioBondingCurve is DSMath {
         totalContributed = add(totalContributed, amount);
     }
     
-    function setBuyPrice(uint amount)
-    public {
+    function getBuyPrice(uint amount)
+    external {
         uint price = calcMintPrice(amount);
-        asks[msg.sender] = price;
+        emit CalcPrice(msg.sender, amount, price);
+
     }
     
-    function getPrice()
-    public view returns (uint) {
-        return asks[msg.sender];
-    }
-    
-    function setSellPrice(uint amount)
-    public {
+    function getSellPrice(uint amount)
+    external {
         uint price = calcBurnReward(amount);
-        asks[msg.sender] = price;
+        emit CalcPrice(msg.sender, amount, price);
     }
 
     function integrate(uint limitA, uint limitB, uint multiplier)
@@ -177,4 +167,40 @@ contract ScenarioBondingCurve is DSMath {
         uint result = integrate(newSupply, currentSupply, reserveRatio);
         return result;
     }
+
+//     function log_2(uint128 x)
+//     internal pure returns (uint128) {
+//         uint256 msb = 0;
+//         uint256 xc = x;
+//         if (xc >= 0x10000000000000000) { xc >>= 64; msb += 64; }
+//         if (xc >= 0x100000000) { xc >>= 32; msb += 32; }
+//         if (xc >= 0x10000) { xc >>= 16; msb += 16; }
+//         if (xc >= 0x100) { xc >>= 8; msb += 8; }
+//         if (xc >= 0x10) { xc >>= 4; msb += 4; }
+//         if (xc >= 0x4) { xc >>= 2; msb += 2; }
+//         if (xc >= 0x2) msb += 1;
+//         uint256 result = msb - 64 << 64;
+//         uint256 ux = uint256 (x) << 127 - msb;
+//         for (uint256 bit = 0x8000000000000000; bit > 0; bit >>= 1) {
+//             ux *= ux;
+//             uint256 b = ux >> 255;
+//             ux >>= 127 + b;
+//             result += bit * uint256 (b);
+//         }
+//         return uint128 (result);
+//     }
+
+//     function ln(uint128 x)
+//     internal pure returns (uint128) {
+//         return uint128 (
+//             uint256 (log_2(x)) * 0xB17217F7D1CF79ABC9E3B39803F2F6AF >> 128);
+//   }
+
+//     function integratePowerLaw(uint limitA, uint limitB, uint multiplier)
+//     internal returns (uint) {
+//         uint upper = base ** limitB;
+//         uint lower = base ** limitA;
+//         uint _coefficient = wdiv(wmul(coefficient, multiplier), ln(base));
+//         return wmul(sub(upper, lower), _coefficient);
+//     }
 }
